@@ -2,11 +2,398 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>flashvault</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flashvault: an LRU cache in Rust</title>
+<meta name="description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
+<meta name="author" content="Pavan Nallamothu">
+<link rel="canonical" href="https://pavanchow.github.io/flashvault/">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Flashvault: an LRU cache in Rust">
+<meta property="og:description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
+<meta property="og:url" content="https://pavanchow.github.io/flashvault/">
+<meta property="og:site_name" content="Flashvault">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Flashvault",
+  "description": "Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Cross-platform",
+  "author": { "@type": "Person", "name": "Pavan Nallamothu" },
+  "url": "https://pavanchow.github.io/flashvault/",
+  "programmingLanguage": "Rust"
+}
+</script>
+
+<style>
+  :root{
+    --accent:#5b5bd6;--accent-soft:#eeeefb;
+    --ink:#15161c;--muted:#6a6d78;--faint:#9a9dab;
+    --line:#ececed;--panel:#f7f7f9;--panel2:#fbfbfd;
+    --mono:ui-monospace,SFMono-Regular,Menlo,"SF Mono",monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:#fff;color:var(--ink);
+    font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+
+  nav{position:sticky;top:0;z-index:20;background:rgba(255,255,255,.82);backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--line)}
+  nav .row{display:flex;justify-content:space-between;align-items:center;height:56px;max-width:1040px;margin:0 auto;padding:0 28px}
+  nav .brand{display:flex;align-items:center;gap:9px;font-size:18px;font-weight:650;letter-spacing:-.01em}
+  nav .brand .gem{width:16px;height:16px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#9a9af4,#5b5bd6)}
+  nav .links{display:flex;gap:26px;align-items:center}
+  nav .links a{color:var(--ink);font-size:14.5px}
+  @media(max-width:640px){nav .links a:not(.gh){display:none}}
+
+  .hero{padding:70px 0 30px;text-align:center}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+  h1{font-size:clamp(40px,7vw,72px);line-height:1.03;letter-spacing:-.035em;font-weight:680;margin:18px 0 0}
+  .hero p.sub{max-width:620px;margin:24px auto 0;font-size:clamp(17px,2.1vw,21px);color:var(--muted)}
+
+  .stage{max-width:900px;margin:44px auto 0;padding:0 28px}
+  .card{position:relative;background:linear-gradient(180deg,#fbfbff,#f4f4fb);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:0 1px 0 #fff inset,0 18px 50px -30px rgba(40,40,90,.35);padding:26px}
+
+  .demo-row{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-bottom:18px}
+  .demo-row label{font-family:var(--mono);font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px}
+  .demo-row input[type=text]{font:14px var(--mono);padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:#fff;width:110px}
+  .demo-row input[type=range]{accent-color:var(--accent);width:120px}
+  .demo-row button{cursor:pointer;font:600 13px var(--mono);padding:8px 14px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink)}
+  .demo-row button:hover{border-color:var(--accent);color:var(--accent)}
+  .demo-row button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+  .demo-row button.primary:hover{opacity:.9;color:#fff}
+  .demo-row .capn{font-weight:700;color:var(--ink)}
+
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+  .stat{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:center}
+  .stat .v{font:700 20px var(--mono);color:var(--ink)}
+  .stat .l{font-family:var(--mono);font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  @media(max-width:640px){.stats-row{grid-template-columns:repeat(2,1fr)}}
+
+  .entries{display:flex;flex-direction:column;gap:6px;min-height:60px}
+  .entry{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-family:var(--mono);font-size:13px;transition:background .3s,border-color .3s}
+  .entry .rank{color:var(--faint);width:18px}
+  .entry .k{color:var(--ink);font-weight:600}
+  .entry .arrow{color:var(--faint)}
+  .entry .v{color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .entry .ttl{color:var(--faint);font-size:11px}
+  .entry.mru{border-color:var(--accent)}
+  .entry.evict-next{background:#fdf0f0;border-color:#e0a1a1}
+  .entry.evict-next .k{color:#b23c3c}
+  .empty-note{font-family:var(--mono);font-size:13px;color:var(--faint);padding:14px 0;text-align:center}
+  .caption{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:16px}
+
+  section{padding:92px 0;border-top:1px solid var(--line)}
+  h2{font-size:clamp(27px,4.2vw,42px);line-height:1.12;letter-spacing:-.025em;font-weight:660;text-align:center;max-width:760px;margin:0 auto}
+  .lead{max-width:620px;margin:22px auto 0;text-align:center;color:var(--muted);font-size:18px}
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:900px;margin:48px auto 0}
+  @media(max-width:720px){.steps{grid-template-columns:1fr}}
+  .step{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:24px}
+  .step .n{display:inline-flex;width:28px;height:28px;border-radius:8px;background:var(--accent-soft);color:var(--accent);align-items:center;justify-content:center;font:700 13px var(--mono);margin-bottom:12px}
+  .step h3{font-size:17px;margin-bottom:6px}.step p{color:var(--muted);font-size:15px}
+  pre{background:#15161c;color:#ececf4;border-radius:14px;padding:20px 22px;font-family:var(--mono);font-size:13.5px;overflow-x:auto;max-width:640px;margin:40px auto 0}
+  pre .c{color:#8a8d9a}
+  footer{padding:64px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
+  footer .name{color:var(--ink);font-weight:600}
+</style>
 </head>
 <body>
-<h1>flashvault</h1>
-<p>Site coming soon.</p>
-<p><a href="https://github.com/pavanchow/flashvault">View repository</a></p>
+  <nav><div class="row">
+    <div class="brand"><span class="gem"></span>Flashvault</div>
+    <div class="links">
+      <a href="#demo">Demo</a><a href="#how">How it works</a><a href="#source">Source</a>
+      <a class="gh" href="https://github.com/pavanchow/flashvault">GitHub</a>
+    </div>
+  </div></nav>
+
+  <div id="demo" class="hero">
+    <p class="eyebrow">Rust · LRU cache in Rust · no dependency but clap</p>
+    <h1>Every eviction,<br>in plain sight.</h1>
+    <p class="sub">Flashvault is an LRU cache in Rust with a capacity bound, TTL expiry, and live hit-rate stats, all of it readable end to end. Set some keys below and watch the eviction order move.</p>
+  </div>
+
+  <div class="stage">
+    <div class="card">
+      <div class="demo-row">
+        <label>Key <input id="keyIn" type="text" value="" placeholder="key"></label>
+        <label>Value <input id="valIn" type="text" value="" placeholder="value"></label>
+        <button id="setBtn" class="primary" type="button">Set</button>
+        <button id="getBtn" type="button">Get</button>
+        <button id="clearBtn" type="button">Reset demo</button>
+      </div>
+      <div class="demo-row">
+        <label>Capacity <input id="capSlider" type="range" min="1" max="10" value="5"> <span id="capVal" class="capn">5</span></label>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat"><div class="v" id="stHits">0</div><div class="l">Hits</div></div>
+        <div class="stat"><div class="v" id="stMisses">0</div><div class="l">Misses</div></div>
+        <div class="stat"><div class="v" id="stEvictions">0</div><div class="l">Evictions</div></div>
+        <div class="stat"><div class="v" id="stRate">0%</div><div class="l">Hit rate</div></div>
+      </div>
+
+      <div id="entries" class="entries"></div>
+      <p class="caption">most-recently-used first · red row is what the next insert would evict · state resets with the button, not on reload</p>
+    </div>
+  </div>
+
+  <section id="how">
+    <h2>How it works</h2>
+    <p class="lead">A HashMap for lookup and an intrusive doubly linked list for order, so both get and put stay O(1).</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><h3>Slab of nodes</h3><p>Entries live in a flat Vec of slots. A free list lets removed slots be reused instead of leaking space.</p></div>
+      <div class="step"><div class="n">2</div><h3>Intrusive list</h3><p>Each node carries prev and next indices, so moving a key to the front on a hit is a pointer swap, not a scan.</p></div>
+      <div class="step"><div class="n">3</div><h3>Capacity bound</h3><p>A put that would exceed capacity evicts the tail, the least-recently-used entry, before inserting.</p></div>
+      <div class="step"><div class="n">4</div><h3>TTL on read</h3><p>Expiry is checked lazily at get time. An expired entry counts as a miss and an expiration, then is removed.</p></div>
+      <div class="step"><div class="n">5</div><h3>Injectable clock</h3><p>A Clock trait separates real time from a settable TestClock, so TTL tests are deterministic, no sleeping.</p></div>
+      <div class="step"><div class="n">6</div><h3>Live stats</h3><p>Hits, misses, evictions, expirations, and size are counted as they happen and read back with one call.</p></div>
+    </div>
+  </section>
+
+  <section id="source">
+    <h2>Try it from the command line.</h2>
+    <p class="lead">The same cache the demo above ports to JavaScript, running for real.</p>
+    <pre><span class="c"># run the canned workload and print the stats it produces</span>
+cargo run -- --capacity 3 demo
+
+<span class="c"># interactive repl: set, get, del, keys, stats</span>
+cargo run -- repl</pre>
+  </section>
+
+  <noscript>
+    <div class="wrap" style="padding:40px 28px;color:#6a6d78">
+      Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats. It pairs a HashMap for O(1) lookup with an intrusive doubly linked list for O(1) recency updates and eviction, checks expiry lazily on read, and takes an injectable clock so TTL behavior can be tested without sleeping. Source at github.com/pavanchow/flashvault. By Pavan Nallamothu.
+    </div>
+  </noscript>
+
+  <footer>
+    <p>A cache you can read end to end.</p>
+    <p style="margin-top:12px"><a href="https://github.com/pavanchow/flashvault">github.com/pavanchow/flashvault</a></p>
+    <p style="margin-top:12px">By <span class="name">Pavan Nallamothu</span>.</p>
+  </footer>
+
+<script>
+(function () {
+  "use strict";
+
+  // cache.rs, ported: HashMap + intrusive doubly linked list over a slot array.
+  function Node(key, value, ttlMs, now) {
+    this.key = key;
+    this.value = value;
+    this.expiresAt = ttlMs == null ? null : now + ttlMs;
+    this.prev = null;
+    this.next = null;
+  }
+
+  function Cache(capacity) {
+    this.capacity = capacity;
+    this.map = new Map(); // key -> Node
+    this.head = null; // most recently used
+    this.tail = null; // least recently used
+    this.stats = { hits: 0, misses: 0, evictions: 0, expirations: 0 };
+  }
+
+  Cache.prototype.size = function () { return this.map.size; };
+
+  Cache.prototype.unlink = function (node) {
+    if (node.prev) node.prev.next = node.next; else this.head = node.next;
+    if (node.next) node.next.prev = node.prev; else this.tail = node.prev;
+    node.prev = null; node.next = null;
+  };
+
+  Cache.prototype.pushFront = function (node) {
+    node.prev = null;
+    node.next = this.head;
+    if (this.head) this.head.prev = node;
+    this.head = node;
+    if (!this.tail) this.tail = node;
+  };
+
+  Cache.prototype.touch = function (node) {
+    if (this.head === node) return;
+    this.unlink(node);
+    this.pushFront(node);
+  };
+
+  Cache.prototype.evictLru = function () {
+    if (!this.tail) return null;
+    var victim = this.tail;
+    this.unlink(victim);
+    this.map.delete(victim.key);
+    this.stats.evictions++;
+    return victim.key;
+  };
+
+  Cache.prototype.put = function (key, value, ttlMs, now) {
+    if (this.capacity <= 0) return null;
+    var existing = this.map.get(key);
+    if (existing) {
+      existing.value = value;
+      existing.expiresAt = ttlMs == null ? null : now + ttlMs;
+      this.touch(existing);
+      return null;
+    }
+    var evicted = null;
+    if (this.map.size >= this.capacity) evicted = this.evictLru();
+    var node = new Node(key, value, ttlMs, now);
+    this.map.set(key, node);
+    this.pushFront(node);
+    return evicted;
+  };
+
+  Cache.prototype.get = function (key, now) {
+    var node = this.map.get(key);
+    if (!node) { this.stats.misses++; return undefined; }
+    if (node.expiresAt !== null && now >= node.expiresAt) {
+      this.unlink(node);
+      this.map.delete(key);
+      this.stats.misses++;
+      this.stats.expirations++;
+      return undefined;
+    }
+    this.touch(node);
+    this.stats.hits++;
+    return node.value;
+  };
+
+  Cache.prototype.keysByRecency = function () {
+    var out = [];
+    var cur = this.head;
+    while (cur) { out.push(cur); cur = cur.next; }
+    return out;
+  };
+
+  Cache.prototype.hitRate = function () {
+    var total = this.stats.hits + this.stats.misses;
+    return total === 0 ? 0 : this.stats.hits / total;
+  };
+
+  // -- wire it to the DOM --------------------------------------------------
+
+  var capSlider = document.getElementById('capSlider');
+  var capVal = document.getElementById('capVal');
+  var keyIn = document.getElementById('keyIn');
+  var valIn = document.getElementById('valIn');
+  var setBtn = document.getElementById('setBtn');
+  var getBtn = document.getElementById('getBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  var entriesEl = document.getElementById('entries');
+  var stHits = document.getElementById('stHits');
+  var stMisses = document.getElementById('stMisses');
+  var stEvictions = document.getElementById('stEvictions');
+  var stRate = document.getElementById('stRate');
+
+  var cache;
+  var flashMiss = null;
+
+  function seed(capacity) {
+    cache = new Cache(capacity);
+    var seeds = [
+      ['session', 'a91f...e2', null],
+      ['user:42', 'pavan', null],
+      ['config', 'v3', 30000],
+      ['token', 'jwt.eyJ...', 8000],
+      ['locale', 'en-US', null]
+    ];
+    var now = Date.now();
+    for (var i = 0; i < Math.min(seeds.length, capacity); i++) {
+      cache.put(seeds[i][0], seeds[i][1], seeds[i][2], now);
+    }
+  }
+
+  function fmtTtl(node, now) {
+    if (node.expiresAt === null) return 'no ttl';
+    var left = node.expiresAt - now;
+    return left > 0 ? Math.round(left / 1000) + 's left' : 'expired';
+  }
+
+  function render() {
+    var now = Date.now();
+    var nodes = cache.keysByRecency();
+    entriesEl.innerHTML = '';
+
+    if (nodes.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'empty-note';
+      empty.textContent = 'cache is empty, set a key above';
+      entriesEl.appendChild(empty);
+    } else {
+      var willEvictKey = null;
+      if (nodes.length >= cache.capacity) {
+        var tail = nodes[nodes.length - 1];
+        willEvictKey = tail.key;
+      }
+      for (var i = 0; i < nodes.length; i++) {
+        var n = nodes[i];
+        var row = document.createElement('div');
+        row.className = 'entry' + (i === 0 ? ' mru' : '') + (n.key === willEvictKey && !flashMiss ? ' evict-next' : '');
+        row.innerHTML =
+          '<span class="rank">' + (i + 1) + '</span>' +
+          '<span class="k">' + escapeHtml(n.key) + '</span>' +
+          '<span class="arrow">&rarr;</span>' +
+          '<span class="v">' + escapeHtml(String(n.value)) + '</span>' +
+          '<span class="ttl">' + fmtTtl(n, now) + '</span>';
+        entriesEl.appendChild(row);
+      }
+    }
+
+    stHits.textContent = cache.stats.hits;
+    stMisses.textContent = cache.stats.misses;
+    stEvictions.textContent = cache.stats.evictions;
+    stRate.textContent = Math.round(cache.hitRate() * 100) + '%';
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  setBtn.addEventListener('click', function () {
+    var k = keyIn.value.trim();
+    var v = valIn.value.trim();
+    if (!k) return;
+    if (!v) v = '(empty)';
+    cache.put(k, v, null, Date.now());
+    keyIn.value = '';
+    valIn.value = '';
+    render();
+  });
+
+  getBtn.addEventListener('click', function () {
+    var k = keyIn.value.trim();
+    if (!k) return;
+    var v = cache.get(k, Date.now());
+    flashMiss = v === undefined;
+    render();
+    flashMiss = null;
+  });
+
+  capSlider.addEventListener('input', function () {
+    capVal.textContent = capSlider.value;
+    seed(parseInt(capSlider.value, 10));
+    render();
+  });
+
+  clearBtn.addEventListener('click', function () {
+    seed(parseInt(capSlider.value, 10));
+    render();
+  });
+
+  [keyIn, valIn].forEach(function (el) {
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') setBtn.click();
+    });
+  });
+
+  seed(parseInt(capSlider.value, 10));
+  render();
+  setInterval(render, 1000); // keep TTL countdowns live
+})();
+</script>
 </body>
 </html>
