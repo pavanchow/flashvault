@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use flashvault::{Cache, SystemClock};
-use std::io::{self, BufRead, Write};
+use std::io::{self, BufRead, Read, Write};
 
 #[derive(Parser)]
 #[command(name = "flashvault", version, about = "An in-memory LRU cache with TTL expiry.")]
@@ -99,8 +99,10 @@ fn run_repl(mut cache: Cache<String, SystemClock>) {
         print!("> ");
         let _ = stdout.flush();
 
+        // Cap a single line so piping a huge input with no newline cannot
+        // grow the buffer without bound.
         let mut line = String::new();
-        if stdin.lock().read_line(&mut line).unwrap_or(0) == 0 {
+        if stdin.lock().take(1024 * 1024).read_line(&mut line).unwrap_or(0) == 0 {
             break; // EOF
         }
         let parts: Vec<&str> = line.trim().split_whitespace().collect();
