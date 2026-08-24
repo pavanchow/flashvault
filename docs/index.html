@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Flashvault: an LRU cache in Rust</title>
 <meta name="description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
-<meta name="author" content="Pavan Nallamothu">
+<meta name="author" content="Pavan Nallamothu (pavanchow)">
 <link rel="canonical" href="https://pavanchow.github.io/flashvault/">
 
 <meta property="og:type" content="website">
@@ -100,6 +100,10 @@
   footer{padding:64px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
   footer .name{color:var(--ink);font-weight:600}
 </style>
+<link rel="author" href="https://github.com/pavanchow">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Pavan Nallamothu","alternateName":"pavanchow","url":"https://github.com/pavanchow","sameAs":["https://github.com/pavanchow","https://hackerone.com/pavanchow"]}
+</script>
 </head>
 <body>
   <nav><div class="row">
@@ -166,7 +170,7 @@ cargo run -- repl</pre>
 
   <noscript>
     <div class="wrap" style="padding:40px 28px;color:#6a6d78">
-      Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats. It pairs a HashMap for O(1) lookup with an intrusive doubly linked list for O(1) recency updates and eviction, checks expiry lazily on read, and takes an injectable clock so TTL behavior can be tested without sleeping. Source at github.com/pavanchow/flashvault. By Pavan Nallamothu.
+      Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats. It pairs a HashMap for O(1) lookup with an intrusive doubly linked list for O(1) recency updates and eviction, checks expiry lazily on read, and takes an injectable clock so TTL behavior can be tested without sleeping. Source at github.com/pavanchow/flashvault. By Pavan Nallamothu (pavanchow).
     </div>
   </noscript>
 
