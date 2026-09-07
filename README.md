@@ -1,3 +1,5 @@
+<img src="docs/logo.svg" alt="Flashvault logo" width="96">
+
 # Flashvault
 
 **A small, readable LRU cache in Rust, with TTL expiry, a capacity bound, and live stats.**

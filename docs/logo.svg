@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Flashvault logo">
+  <defs>
+    <linearGradient id="fvT" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7c7cf0"/>
+      <stop offset="1" stop-color="#4b4bc9"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#fvT)"/>
+  <circle cx="64" cy="64" r="38" fill="none" stroke="#fff" stroke-width="6" opacity=".55"/>
+  <g stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".55">
+    <path d="M64 26 V38"/><path d="M64 90 V102"/><path d="M26 64 H38"/><path d="M90 64 H102"/>
+  </g>
+  <path d="M70 30 L44 70 H62 L58 98 L86 56 H66 Z" fill="#fff"/>
+</svg>

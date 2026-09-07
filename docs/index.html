@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
 <title>Flashvault: an LRU cache in Rust</title>
 <meta name="description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
 <meta name="author" content="Pavan Nallamothu (pavanchow)">
@@ -99,6 +100,13 @@
   pre .c{color:#8a8d9a}
   footer{padding:64px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
   footer .name{color:var(--ink);font-weight:600}
+  .howto{max-width:640px;margin:26px auto 0;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
+  .howto summary{cursor:pointer;padding:14px 18px;font:600 14px var(--mono);color:var(--ink);list-style:none}
+  .howto summary::-webkit-details-marker{display:none}
+  .howto summary::before{content:"▸";margin-right:9px;color:var(--accent)}
+  .howto[open] summary::before{content:"▾"}
+  .howto .body{padding:0 18px 16px;color:var(--muted);font-size:15px}
+  .howto .body b{color:var(--ink)}
 </style>
 <link rel="author" href="https://github.com/pavanchow">
 <script type="application/ld+json">
@@ -115,6 +123,7 @@
   </div></nav>
 
   <div id="demo" class="hero">
+    <img src="logo.svg" alt="Flashvault logo" width="72" height="72" style="display:block;margin:0 auto 18px">
     <p class="eyebrow">Rust · LRU cache in Rust · no dependency but clap</p>
     <h1>Every eviction,<br>in plain sight.</h1>
     <p class="sub">Flashvault is an LRU cache in Rust with a capacity bound, TTL expiry, and live hit-rate stats, all of it readable end to end. Set some keys below and watch the eviction order move.</p>
@@ -143,6 +152,11 @@
       <div id="entries" class="entries"></div>
       <p class="caption">most-recently-used first · red row is what the next insert would evict · state resets with the button, not on reload</p>
     </div>
+
+    <details class="howto">
+      <summary>How to use this playground</summary>
+      <div class="body">Type a <b>key</b> and <b>value</b> and hit <b>Set</b> to insert; the list reorders most-recently-used first. <b>Get</b> a key to see it jump to the top on a hit (or bump the miss count). Drag <b>Capacity</b> to change how many entries fit, and watch the red row, the next thing to be evicted, move as you go. <b>Reset demo</b> reseeds. It runs the same cache logic as the Rust crate, ported to JavaScript.</div>
+    </details>
   </div>
 
   <section id="how">
