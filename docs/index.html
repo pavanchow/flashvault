@@ -7,6 +7,7 @@
 <title>Flashvault: an LRU cache in Rust</title>
 <meta name="description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
 <meta name="author" content="Pavan Nallamothu (pavanchow)">
+<meta name="keywords" content="LRU cache, Rust, TTL expiry, in-memory cache, capacity bound, hit rate, intrusive linked list, eviction, from scratch, Pavan Nallamothu, pavanchow">
 <link rel="canonical" href="https://pavanchow.github.io/flashvault/">
 
 <meta property="og:type" content="website">
@@ -23,8 +24,10 @@
   "description": "Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.",
   "applicationCategory": "DeveloperApplication",
   "operatingSystem": "Cross-platform",
+  "softwareVersion": "0.1.0",
   "author": { "@type": "Person", "name": "Pavan Nallamothu" },
   "url": "https://pavanchow.github.io/flashvault/",
+  "codeRepository": "https://github.com/pavanchow/flashvault",
   "programmingLanguage": "Rust"
 }
 </script>
@@ -49,6 +52,7 @@
   nav .brand .gem{width:16px;height:16px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#9a9af4,#5b5bd6)}
   nav .links{display:flex;gap:26px;align-items:center}
   nav .links a{color:var(--ink);font-size:14.5px}
+  nav .v{color:var(--faint);font-family:var(--mono);font-size:12px}
   @media(max-width:640px){nav .links a:not(.gh){display:none}}
 
   .hero{padding:70px 0 30px;text-align:center}
@@ -98,6 +102,13 @@
   .step h3{font-size:17px;margin-bottom:6px}.step p{color:var(--muted);font-size:15px}
   pre{background:#15161c;color:#ececf4;border-radius:14px;padding:20px 22px;font-family:var(--mono);font-size:13.5px;overflow-x:auto;max-width:640px;margin:40px auto 0}
   pre .c{color:#8a8d9a}
+  .term{max-width:680px;margin:38px auto 0;background:#15161c;color:#ececf4;border-radius:14px;padding:20px 22px;font-family:var(--mono);font-size:13px;line-height:1.7;overflow-x:auto}
+  .term .c{color:#8a8d9a}.term .k{color:#9a9af4;font-weight:600}.term .ok{color:#5fd18a}
+  .rows{max-width:800px;margin:44px auto 0}
+  .rows .r{display:grid;grid-template-columns:minmax(150px,1fr) 2fr;gap:14px 38px;padding:24px 0;border-top:1px solid var(--line)}
+  .rows .r:first-child{border-top:none}
+  .rows .r b{font-size:17px}.rows .r p{color:var(--muted)}
+  @media(max-width:640px){.rows .r{grid-template-columns:1fr;gap:6px}}
   footer{padding:64px 0;border-top:1px solid var(--line);text-align:center;color:var(--muted)}
   footer .name{color:var(--ink);font-weight:600}
   .howto{max-width:640px;margin:26px auto 0;border:1px solid var(--line);border-radius:14px;background:var(--panel2)}
@@ -119,6 +130,7 @@
     <div class="links">
       <a href="#demo">Demo</a><a href="#how">How it works</a><a href="#source">Source</a>
       <a class="gh" href="https://github.com/pavanchow/flashvault">GitHub</a>
+      <span class="v">v0.1.0</span>
     </div>
   </div></nav>
 
@@ -172,9 +184,40 @@
     </div>
   </section>
 
+  <section>
+    <h2>The stats it keeps, printed for real.</h2>
+    <p class="lead">A canned workload at capacity 3: fill the cache, touch a key so it survives, insert past the bound so eviction fires, and let a short-lived entry expire. The final line is the exact stats the crate produces.</p>
+    <div class="term">
+<span class="c">$ cargo run -- --capacity 3 demo</span><br>
+flashvault demo, capacity=3<br>
+filled cache to capacity (3 entries)<br>
+touched <span class="k">key0</span> -&gt; value0 (now most-recently-used)<br>
+inserted one more key, size is still 3 (&lt;= capacity 3)<br>
+short-lived key expired as expected<br>
+<span class="ok">stats: hits=1 misses=1 evictions=2 expirations=1 size=2 hit_rate=0.50</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Small enough to embed, not import.</h2>
+    <p class="lead">There are excellent cache crates. Flashvault is the other option: one file you can read, own, and drop in when a large dependency is more than the job needs.</p>
+    <div class="rows">
+      <div class="r"><b>The lru crate</b><p>A solid, widely used LRU implementation. It does not carry TTL expiry or a stats surface, so those are yours to add on top.</p></div>
+      <div class="r"><b>moka, cached</b><p>Full-featured, concurrent, production caches. Powerful, and far more code and surface than a single-threaded readable cache calls for.</p></div>
+      <div class="r"><b>A bare HashMap</b><p>No recency, no bound, no expiry. Grows without limit and never evicts, which is exactly what a cache is supposed to do for you.</p></div>
+      <div class="r"><b>Flashvault</b><p>HashMap lookup, an intrusive list for O(1) recency, a hard capacity bound, lazy TTL expiry, an injectable clock, and live stats. Small enough to read end to end.</p></div>
+    </div>
+  </section>
+
   <section id="source">
-    <h2>Try it from the command line.</h2>
-    <p class="lead">The same cache the demo above ports to JavaScript, running for real.</p>
+    <h2>A library, a CLI, and a repl.</h2>
+    <p class="lead">The same cache ships three ways: call it from Rust, run one-shot commands, or poke at it interactively.</p>
+    <div class="rows">
+      <div class="r"><b>Library</b><p>Build a <code>Cache</code> with a capacity and a <code>Clock</code>, then <code>put</code> with an optional TTL and <code>get</code>. Read <code>stats()</code> for hits, misses, evictions, expirations, size, and hit rate.</p></div>
+      <div class="r"><b>CLI</b><p>One-shot <code>set</code> and <code>get</code>, or <code>demo</code> to run the canned workload and print the stats it produces.</p></div>
+      <div class="r"><b>Repl</b><p><code>cargo run -- repl</code> gives an interactive prompt: set, get, del, keys, stats, quit.</p></div>
+      <div class="r"><b>Tests</b><p><code>cargo test</code> covers capacity-bound eviction, recency refresh on get, TTL expiry as a miss plus removal, stats correctness, and zero-capacity safety, using the settable TestClock so nothing sleeps.</p></div>
+    </div>
     <pre><span class="c"># run the canned workload and print the stats it produces</span>
 cargo run -- --capacity 3 demo
 
