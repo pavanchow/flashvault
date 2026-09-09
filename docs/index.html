@@ -4,36 +4,39 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/svg+xml" href="logo.svg">
-<title>Flashvault: an LRU cache in Rust</title>
-<meta name="description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
-<meta name="author" content="Pavan Nallamothu (pavanchow)">
-<meta name="keywords" content="LRU cache, Rust, TTL expiry, in-memory cache, capacity bound, hit rate, intrusive linked list, eviction, from scratch, Pavan Nallamothu, pavanchow">
+<title>Flashvault: LRU cache in Rust | Pavan Nallamothu</title>
+<meta name="description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live hit-rate stats, built from scratch with O(1) get and put. By Pavan Nallamothu.">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
+<meta name="author" content="Pavan Nallamothu">
+<meta name="keywords" content="Flashvault, LRU cache in Rust, TTL expiry, in-memory cache, capacity bound, cache eviction, cache hit rate, intrusive linked list, O(1) cache, from scratch cache, cache with stats, Rust caching, least recently used, Pavan Nallamothu, pavanchow">
 <link rel="canonical" href="https://pavanchow.github.io/flashvault/">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Flashvault: an LRU cache in Rust">
-<meta property="og:description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
+<meta property="og:site_name" content="Pavan Nallamothu">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Flashvault: LRU cache in Rust | Pavan Nallamothu">
+<meta property="og:description" content="An LRU cache in Rust with TTL expiry, a capacity bound, and live hit-rate stats. O(1) get and put via a HashMap and an intrusive linked list.">
 <meta property="og:url" content="https://pavanchow.github.io/flashvault/">
-<meta property="og:site_name" content="Flashvault">
+<meta property="og:image" content="https://pavanchow.github.io/flashvault/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Flashvault by Pavan Nallamothu">
 
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Flashvault: an LRU cache in Rust">
-<meta name="twitter:description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Flashvault: LRU cache in Rust | Pavan Nallamothu">
+<meta name="twitter:description" content="An LRU cache in Rust with TTL expiry, a capacity bound, and live hit-rate stats. O(1) get and put, built from scratch. By Pavan Nallamothu.">
+<meta name="twitter:image" content="https://pavanchow.github.io/flashvault/og-image.png">
+<meta name="twitter:creator" content="@pavanchow">
+<meta name="twitter:site" content="@pavanchow">
 
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "Flashvault",
-  "description": "Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.",
-  "applicationCategory": "DeveloperApplication",
-  "operatingSystem": "Cross-platform",
-  "softwareVersion": "0.1.0",
-  "author": { "@type": "Person", "name": "Pavan Nallamothu" },
-  "url": "https://pavanchow.github.io/flashvault/",
-  "codeRepository": "https://github.com/pavanchow/flashvault",
-  "programmingLanguage": "Rust"
-}
+{"@context":"https://schema.org","@graph":[
+{"@type":"SoftwareApplication","name":"Flashvault","applicationCategory":"DeveloperApplication","operatingSystem":"Cross-platform","softwareVersion":"0.1.0","description":"Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, pairing a HashMap for O(1) lookup with an intrusive doubly linked list for O(1) recency updates and eviction.","url":"https://pavanchow.github.io/flashvault/","image":"https://pavanchow.github.io/flashvault/og-image.png","programmingLanguage":"Rust","codeRepository":"https://github.com/pavanchow/flashvault","license":"https://opensource.org/licenses/MIT","datePublished":"2026-08-21","author":{"@id":"https://github.com/pavanchow#pavan-nallamothu"},"publisher":{"@id":"https://github.com/pavanchow#pavan-nallamothu"},"keywords":"LRU cache, TTL expiry, capacity bound, cache eviction, hit rate, intrusive linked list, in-memory cache","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"featureList":["O(1) get and put via HashMap plus intrusive linked list","Capacity-bound LRU eviction","Lazy TTL expiry on read","Injectable clock for deterministic tests","Live hits, misses, evictions, expirations, and hit-rate stats","Library, CLI, and REPL"]},
+{"@type":"Person","@id":"https://github.com/pavanchow#pavan-nallamothu","name":"Pavan Nallamothu","alternateName":"pavanchow","url":"https://github.com/pavanchow","jobTitle":"Software Engineer and Security Researcher","knowsAbout":["Rust","caching","data structures","LRU eviction","systems programming","algorithms"],"sameAs":["https://github.com/pavanchow","https://hackerone.com/pavanchow"]},
+{"@type":"WebSite","name":"Flashvault by Pavan Nallamothu","url":"https://pavanchow.github.io/flashvault/","author":{"@id":"https://github.com/pavanchow#pavan-nallamothu"}},
+{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Pavan Nallamothu","item":"https://github.com/pavanchow"},{"@type":"ListItem","position":2,"name":"Flashvault","item":"https://pavanchow.github.io/flashvault/"}]},
+{"@type":"WebPage","url":"https://pavanchow.github.io/flashvault/","name":"Flashvault: LRU cache in Rust | Pavan Nallamothu","isPartOf":{"@id":"https://pavanchow.github.io/flashvault/"},"about":{"@type":"SoftwareApplication","name":"Flashvault"},"author":{"@id":"https://github.com/pavanchow#pavan-nallamothu"},"inLanguage":"en"}
+]}
 </script>
 
 <style>
@@ -135,9 +138,6 @@
   .howto .body b{color:var(--ink)}
 </style>
 <link rel="author" href="https://github.com/pavanchow">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Person","name":"Pavan Nallamothu","alternateName":"pavanchow","url":"https://github.com/pavanchow","sameAs":["https://github.com/pavanchow","https://hackerone.com/pavanchow"]}
-</script>
 </head>
 <body>
   <nav><div class="row">
@@ -247,7 +247,16 @@ cargo run -- repl</pre>
   </noscript>
 
   <footer>
-    <p>A cache you can read end to end.</p>
+    <p style="font-weight:600;color:var(--ink);margin-bottom:14px">More open-source tools by Pavan Nallamothu</p>
+    <p style="max-width:720px;margin:0 auto;line-height:1.9">
+      <a href="https://pavanchow.github.io/flint/">Flint, an embedded single-binary key-value store</a> ·
+      <a href="https://pavanchow.github.io/keystone/">Keystone, a durable ordered key-value store</a> ·
+      <a href="https://pavanchow.github.io/riverbed/">Riverbed, a message broker with bounded queues</a> ·
+      <a href="https://pavanchow.github.io/honeycomb/">Honeycomb, a memory allocator with live stats</a> ·
+      <a href="https://pavanchow.github.io/ledgerstone/">Ledgerstone, an embedded relational database</a> ·
+      <a href="https://github.com/pavanchow">All projects on GitHub</a>
+    </p>
+    <p style="margin-top:28px">A cache you can read end to end.</p>
     <p style="margin-top:12px"><a href="https://github.com/pavanchow/flashvault">github.com/pavanchow/flashvault</a></p>
     <p style="margin-top:12px">By <span class="name">Pavan Nallamothu</span>.</p>
   </footer>
