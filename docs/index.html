@@ -16,6 +16,10 @@
 <meta property="og:url" content="https://pavanchow.github.io/flashvault/">
 <meta property="og:site_name" content="Flashvault">
 
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Flashvault: an LRU cache in Rust">
+<meta name="twitter:description" content="Flashvault is an LRU cache in Rust with TTL expiry, a capacity bound, and live stats, built from scratch with no dependency beyond a CLI parser.">
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -43,6 +47,17 @@
   html{scroll-behavior:smooth}
   body{background:#fff;color:var(--ink);
     font:17px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+  @media(prefers-color-scheme:dark){
+    :root{--accent:#9a9af4;--accent-soft:#1e1e3a;--ink:#f2f2f6;--muted:#b9bcca;--faint:#8a8d9a;
+      --line:#26262a;--panel:#151517;--panel2:#0f0f11;}
+    body{background:#0b0b0d}
+    nav{background:rgba(11,11,13,.72)}
+    .card{background:linear-gradient(180deg,#141419,#0f0f14)}
+    .demo-row input[type=text],.demo-row button{background:var(--panel);color:var(--ink)}
+    .entry{background:var(--panel2)}
+    .entry.evict-next{background:#2a1414;border-color:#7a3b3b}
+    .entry.evict-next .k{color:#ff8a8a}
+  }
   .wrap{max-width:1040px;margin:0 auto;padding:0 28px}
   a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
 
