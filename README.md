@@ -6,6 +6,8 @@ Flashvault is a small, readable LRU cache in Rust with TTL expiry, a capacity bo
 
 **[Live demo](https://pavanchow.github.io/flashvault/)** · MIT licensed · written in Rust
 
+Built from scratch by [Pavan Nallamothu](https://pavanchow.github.io/) ([LinkedIn](https://www.linkedin.com/in/pavanchow/), [GitHub](https://github.com/pavanchow)).
+
 ## What it does
 
 - Capacity bound: a max entry count that is never exceeded.
